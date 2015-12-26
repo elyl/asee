@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include "shell.h"
 
 static t_command cmd[] = {
   {"ps",	ps},
@@ -11,19 +13,19 @@ static t_command cmd[] = {
 
 void shell()
 {
-  char		buffer[BUFFER_SIZE];
+  char		buffer[BUFFER_SIZE + 1];
   int		c;
   int		i;
 
   //Lancer ordonanceur
   printf("$>");
   fflush(stdout);
-  while ((c = read(0, buffer, BUFFER_SIZE - 1)) != -1)
+  while ((c = read(0, buffer, BUFFER_SIZE)) != -1)
     {
       buffer[c] = '\0';
 
       i = 0;
-      while (strcmp(, cmd[i].str) != 0 && i < NB_CMD)
+      while (strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0 && i < NB_CMD)
 	++i;
       if (i == NB_CMD)
 	printf("Unknown command\n");
@@ -35,7 +37,7 @@ void shell()
 	      //Create ctx
 	    }
 	  
-	  cmd[i].fun(arg);
+	  cmd[i].fun(buffer);
 	}
       printf("$>");
       fflush(stdout);
