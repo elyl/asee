@@ -2,7 +2,7 @@
 #define __SHELL_H__
 
 #define BUFFER_SIZE	255
-#define NB_CMD		4
+#define NB_CMD		5
 
 typedef struct s_command
 {
@@ -14,6 +14,7 @@ void	ps(char *arg);
 void	ls(char *arg);
 void	cat(char *arg);
 void	compute(char *arg);
+void	quit(char *arg);
 void	shell();
 
 int	do_fibo(int n);

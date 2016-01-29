@@ -8,7 +8,8 @@ static t_command cmd[] = {
   {"ps",	ps},
   {"ls",	ls},
   {"cat",	cat},
-  {"compute",	compute}
+  {"compute",	compute},
+  {"exit",	quit}
 };
 
 void shell()
@@ -23,10 +24,13 @@ void shell()
   while ((c = read(0, buffer, BUFFER_SIZE)) != -1)
     {
       buffer[c] = '\0';
-
       i = 0;
-      while (strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0 && i < NB_CMD)
-	++i;
+      printf("prout\n");
+      while (c >= (int)strlen(cmd[i].str) && strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0 && i < NB_CMD)
+	{
+	  printf("Ca boucle\n");
+	  ++i;
+	}
       if (i == NB_CMD)
 	printf("Unknown command\n");
       else
@@ -35,8 +39,7 @@ void shell()
 	    {
 	      buffer[c - 1] = '\0';
 	      //Create ctx
-	    }
-	  
+	    }	  
 	  cmd[i].fun(buffer);
 	}
       printf("$>");

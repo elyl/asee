@@ -1,10 +1,14 @@
 NAME=	schd
-SRC=	main.c	\
-	shell.c	\
-	commands.c
+SRC=	main.c		\
+	shell.c		\
+	commands.c 	\
+	create_ctx.c	\
+	init_ctx.c	\
+	start_sched.c	\
+	hw.c
 OBJ=	$(SRC:.c=.o)
 CC=	gcc
-CFLAGS=	-g -W -Wall
+CFLAGS=	-g -W -Wall -m32
 RM=	@rm -fv
 
 $(NAME):	$(OBJ)
