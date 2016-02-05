@@ -7,15 +7,15 @@
 typedef struct s_command
 {
   char	*str;
-  void (*fun) (char*);
+  void (*fun) (void*);
 }	t_command;
 
-void	ps(char *arg);
-void	ls(char *arg);
-void	cat(char *arg);
-void	compute(char *arg);
-void	quit(char *arg);
-void	shell();
+void	ps(void *arg);
+void	ls(void *arg);
+void	cat(void *arg);
+void	compute(void *arg);
+void	quit(void *arg);
+void	shell(void *arg);
 
 int	do_fibo(int n);
 

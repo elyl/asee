@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include "schedule.h"
 #include "shell.h"
 
 static t_command cmd[] = {
@@ -12,17 +13,19 @@ static t_command cmd[] = {
   {"exit",	quit}
 };
 
-void shell()
+void shell(void *arg)
 {
   char		buffer[BUFFER_SIZE + 1];
   int		c;
   int		i;
 
-  //Lancer ordonanceur
+  arg = arg;
   printf("$>");
   fflush(stdout);
   while ((c = read(0, buffer, BUFFER_SIZE)) != -1)
     {
+      if (c > 0 && buffer[c - 1] == '\n')
+	--c;
       buffer[c] = '\0';
       i = 0;
       while (i < NB_CMD && strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0)
@@ -33,10 +36,12 @@ void shell()
 	{
 	  if (buffer[c - 1] == '&')
 	    {
+	      printf("new context\n");
 	      buffer[c - 1] = '\0';
-	      //Create ctx
-	    }	  
-	  cmd[i].fun(buffer);
+	      create_ctx(16384, cmd[i].fun, buffer);
+	    }
+	  else
+	    cmd[i].fun(buffer);
 	}
       printf("$>");
       fflush(stdout);

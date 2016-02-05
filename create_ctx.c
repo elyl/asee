@@ -33,7 +33,7 @@ void yield()
 {
   ctx_t	*ptr;
 
-  printf("Changement de contexte !\n");
+  //  printf("Changement de contexte !\n");
   irq_disable();
   if (ctx->state == 1 && ctx->prev->state == 1)
     {
@@ -57,7 +57,7 @@ void yield()
   ctx = ctx->next;
   if (ctx->state == 2)
     {
-      printf("fin de contexte\n");
+      //printf("fin de contexte\n");
       ctx->prev->next = ctx->next;
       ctx->next->prev = ctx->prev;
       ptr = ctx;
