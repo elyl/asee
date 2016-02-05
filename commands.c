@@ -27,7 +27,10 @@ void compute(char *arg)
 
   strtok(arg, " ");
   ptr = strtok(NULL, " ");
-  printf("Fibo %d : %d\n", atoi(ptr), do_fibo(atoi(ptr)));
+  if (strlen(ptr) != 0)
+    printf("Fibo %d : %d\n", atoi(ptr), do_fibo(atoi(ptr)));
+  else
+    printf("Parse error\n");
 }
 
 int do_fibo(int n)

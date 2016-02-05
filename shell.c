@@ -25,12 +25,8 @@ void shell()
     {
       buffer[c] = '\0';
       i = 0;
-      printf("prout\n");
-      while (c >= (int)strlen(cmd[i].str) && strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0 && i < NB_CMD)
-	{
-	  printf("Ca boucle\n");
-	  ++i;
-	}
+      while (i < NB_CMD && strncmp(buffer, cmd[i].str, strlen(cmd[i].str)) != 0)
+	++i;
       if (i == NB_CMD)
 	printf("Unknown command\n");
       else
