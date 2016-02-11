@@ -1,6 +1,8 @@
 #ifndef __SCHEDULE_H__
 #define __SCHEDULE_H__
 
+#include <time.h>
+
 typedef void (func_t)(void*);
 
 typedef struct ctx_s
@@ -11,11 +13,16 @@ typedef struct ctx_s
   func_t	*f;
   void		*args;
   char		state;
+  char		name[255];
+  time_t	start;
+  time_t	current;
   struct ctx_s	*next;
   struct ctx_s	*prev;
 }	ctx_t;
 
-int	create_ctx(int stack_size, func_t *f, void *args);
+extern ctx_t	*ctx;
+
+int	create_ctx(int stack_size, char *name, func_t *f, void *args);
 int	init_ctx(ctx_t *ctx, int stack_size, func_t *f, void *args);
 
 void	yield();

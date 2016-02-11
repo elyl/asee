@@ -2,10 +2,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include "shell.h"
+#include "schedule.h"
 
 void ps(void *arg)
 {
-  printf("ps NYI\n");
+  ctx_t	*ptr;
+
+  ptr = ctx;
+  printf("Processus \t time \n");
+  while (ptr->next != ctx)
+    {
+      printf("%s \t %d\n", ptr->name, ptr->start);
+      ptr = ptr->next;
+    }
+  printf("%s \t %d\n", ptr->name, ptr->start);
   return;
 }
 

@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "schedule.h"
 #include "hw.h"
 
-static ctx_t	*ctx;
+ctx_t	*ctx;
 static ctx_t	ctx_main;
 
-int create_ctx(int stack_size, func_t *f, void *args)
+int create_ctx(int stack_size, char *name, func_t *f, void *args)
 {
   ctx_t	*ptr;
 
@@ -26,15 +27,20 @@ int create_ctx(int stack_size, func_t *f, void *args)
   ctx->next = ptr;
   ptr->next->prev = ptr;
   ptr->prev = ctx;
+  strcpy(ptr->name, name);
   return (init_ctx(ptr, stack_size, f, args));
 }
 
 void yield()
 {
-  ctx_t	*ptr;
+  ctx_t		*ptr;
+  time_t	end;
 
   //  printf("Changement de contexte !\n");
   irq_disable();
+  end = 0;
+  time(&end);
+  ctx->start += end - ctx->current;
   if (ctx->state == 1 && ctx->prev->state == 1)
     {
       ctx_main.state = 0;
@@ -67,6 +73,7 @@ void yield()
     }
   if (ctx == ptr)
     ctx = &ctx_main;
+  time(&ctx->current);
   asm ("movl %0, %%esp"
        :
        :"r"(ctx->esp));
@@ -76,6 +83,8 @@ void yield()
   irq_enable();
   if (ctx->state == 1)
     {
+      ctx->start = 0;
+      time(&ctx->current);
       ctx->state = 0;
       ctx->f(ctx->args);
       ctx->state = 2;

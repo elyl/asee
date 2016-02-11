@@ -38,7 +38,7 @@ void shell(void *arg)
 	    {
 	      printf("new context\n");
 	      buffer[c - 1] = '\0';
-	      create_ctx(16384, cmd[i].fun, buffer);
+	      create_ctx(16384, cmd[i].str, cmd[i].fun, buffer);
 	    }
 	  else
 	    cmd[i].fun(buffer);
