@@ -39,6 +39,7 @@ void compute(void *arg)
   strtok((char*)arg, " ");
   ptr = strtok(NULL, " ");
   printf("Fibo %d : %d\n", atoi(ptr), do_fibo(atoi(ptr)));
+  ps(NULL);
 }
 
 int do_fibo(int n)

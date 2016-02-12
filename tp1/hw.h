@@ -13,6 +13,7 @@
 typedef void (irq_handler_func_t)(void); 
 
 #define TIMER_IRQ	2
+#define HDA_IRQ		14
 
 void setup_irq(unsigned int irq, irq_handler_func_t handler);
 void start_hw();
