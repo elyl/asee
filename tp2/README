@@ -1,0 +1,22 @@
+Fonctionnement:
+
+L'ensemble des contextes sont stockés dans une liste chainée, lors d'un appel à yield() l'orodonanceur va chercher le premier contexte de la liste qui ne soit ni déjà en cours d'éxécution ni terminé et basculer dessus.
+
+Fonctionnement du changement de contexte:
+- Verication de la presence d'un contexte dans la liste de contextes
+- Recherche d'un contexte non terminé et non en cours d'éxecution
+- Sauvegarde du contexte courant (sauvegarde ebp et esp)
+- Mise en place du nouveau contexte (changement ebp et esp)
+- Si c'est le premier lancement du contexte on lance la fonction associée
+- Une fois le contexte terminé on restaure le contexte d'origine
+
+Le contexte en cours d'éxécution pour chaque coeur est stocké dans le tableau ctx_current, cela permet de noter le contexte comme en pause lors du changement de contexte (et donc de le rendre disponible à nouveau pour les autres coeurs).
+
+Quand il n'y a plus de contextes à lancer les coeurs ne font rien.
+
+Etat du projet:
+
+Actuellement il est possible de lancer de nouveaux contextes sur un coeur à condition qu'ils se terminent avant le changement de contexte suivant.
+Lors de la restauration d'un contexte dont l'éxécution avait déjà commencée le programme crash.
+
+L'ordonanceur n'a pas été tester sur plusieurs coeurs simultanément.
