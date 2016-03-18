@@ -100,7 +100,7 @@ void switch_to_ctx(ctx_t *new_ctx, int core)
   irq_disable();
   //CORE LOCK
   asm ("movl %0, %%esp"
-       :
+	:
 	:"r"(ctx_main[_in(CORE_ID)].esp));
   asm ("movl %0, %%ebp"
        :

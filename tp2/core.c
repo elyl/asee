@@ -4,9 +4,10 @@
 
 void time_handler()
 {
-  //printf("time !\n");
+  printf("time !\n");
   change_ctx_state(_in(CORE_ID));
   _out(TIMER_ALARM,0xFFFFFFFE);
+  printf("On change !\n");
   yield();
 }
 
