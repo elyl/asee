@@ -41,10 +41,12 @@ void change_ctx_state(int core)
 
 void clean_ctx(ctx_t *ptr)
 {
-  free(ptr->base);
-  free(ptr);
   ptr->prev->next = ptr->next;
   ptr->next->prev = ptr->prev;
+  if (ptr->next == ptr)
+    ctx = NULL;
+  free(ptr->base);
+  free(ptr);
 }
 
 ctx_t	*find_next_iddle()
