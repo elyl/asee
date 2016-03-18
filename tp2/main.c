@@ -1,21 +1,32 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include "hardware.h"
+#include "schedule.h"
+#include "shell.h"
 
-void init()
+void f_ping(void *arg)
 {
-  unsigned char	nb;
-
-  nb = _in(CORE_ID);
-  printf("Core : %d\n", nb);
+  //while (1)
+    printf("ping ping ping\n");
 }
 
-int main()
+void f_pong(void *arg)
 {
-  printf("%d\n", init_hardware("core.ini"));
-  IRQVECTOR[0] = init;
-  _out(CORE_STATUS, 0xff);
-  sleep(20);
+  //while (1)
+    printf("pong pong pong\n");
+    while (1)
+      ;
+}
+
+int main(int argc, char **argv)
+{
+  argc = argc;
+  argv = argv;
+  create_ctx(2048, "tutu", f_ping, NULL);
+  create_ctx(2048, "tutu", f_pong, NULL);
+  start_sched();
+  //yield();
+  while (1)
+    ;
+  //printf("maaaaaaaaaaaaaaaaaaaaaain\n");
   return (0);
 }
