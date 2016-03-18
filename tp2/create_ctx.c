@@ -59,7 +59,7 @@ ctx_t	*find_next_iddle()
       ptr = ptr->next;
     }
   ctx = ptr;
-  return ((ptr->state == CTX_STOP || ptr->state == CTX_RUN) ? ptr : NULL);
+  return ((ptr->state == CTX_STOP || ptr->state == CTX_START) ? ptr : NULL);
 }
 
 void switch_to_ctx(ctx_t *new_ctx, int core)
