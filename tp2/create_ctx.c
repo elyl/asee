@@ -41,6 +41,8 @@ void change_ctx_state(int core)
 
 void clean_ctx(ctx_t *ptr)
 {
+  if (ctx == ptr)
+    ctx = ctx->next;
   ptr->prev->next = ptr->next;
   ptr->next->prev = ptr->prev;
   if (ptr->next == ptr)
