@@ -19,4 +19,10 @@ Etat du projet:
 Actuellement il est possible de lancer de nouveaux contextes sur un coeur à condition qu'ils se terminent avant le changement de contexte suivant.
 Lors de la restauration d'un contexte dont l'éxécution avait déjà commencée le programme crash.
 
-L'ordonanceur n'a pas été tester sur plusieurs coeurs simultanément.
+Cela est du à une corruption mémoire, à un moment de l'éxécution qui reste à déterminer le programme écrit dans la zone mémoire réservée à la structure définissant le contexte ce qui donne des valeurs de esp et ebp complétement fausses lors de la restauration du contexte. Le problème ne vient pas de la quantité de mémoire disponible pour le contexte, augmenter significativement la mémoire disponible n'a aucun impact sur le fonctionnement du programme.
+
+Les commentaires "CORE LOCK" et "CORE UNLOCK" correspondent respectivement aux emplacements où devraient se trouver un core_lock et un core_unlock. Ils ne sont pas implémentés car non nécessaire dans le cadre des tests sur un seul coeur. 
+
+L'ordonanceur n'a pas été tester sur plusieurs coeurs simultanément. Néanmoins, s'il fonctionne correctement sur un coeur il n'y a aucune raison qu'il n'en soit pas de même avec un nombre quelquonque de coeurs.
+
+Le projet n'est pas terminé faute de temps disponible pour le terminer sans léser les autres matières.

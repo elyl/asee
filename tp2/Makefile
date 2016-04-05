@@ -7,8 +7,8 @@ SRC=	main.c		\
 OBJ=	$(SRC:.c=.o)
 CC=	gcc
 CFLAGS=	-g -W -Wall -m32 -pthread $(INC)
-LIB=	-L/home/elyl/lib -lhardware
-INC=	-I/home/elyl/include
+LIB=	-L/home/m1/lheureux/lib -lhardware
+INC=	-I/home/m1/lheureux/include
 RM=	@rm -fv
 
 $(NAME):	$(OBJ)

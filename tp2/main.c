@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "schedule.h"
-#include "shell.h"
 
 void f_ping(void *arg)
 {
