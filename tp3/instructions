@@ -1,0 +1,11 @@
+- L'image debian est dans /kvm/debian32.img
+- Le build dans /build/kvm32 ne marche pas, il build dans le repertoire racine
+- Le mount ne marche pas, necessite sudo
+
+Etat du module:
+Initialisation OK
+show file KO, A faire
+write file ?
+
+Recherches:
+mettre un prob dans do_sched_setScheduler; core.c:3705
