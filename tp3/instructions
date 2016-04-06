@@ -14,3 +14,4 @@ include/linux/sched.h:1293 task_struct
 include/linux/pid.h:83 pid_task
 include/linux/pid.h:111 find_vpid
 include/linux/pid.h:84 get_pid_task
+include/linux/kernel.h:363 kstrtoutint
