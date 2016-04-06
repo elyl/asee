@@ -74,3 +74,4 @@ ase_cmd_proc_exit(void)
 
 module_init(ase_cmd_proc_init);
 module_exit(ase_cmd_proc_exit);
+MODULE_LICENSE("GPL");
