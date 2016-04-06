@@ -9,3 +9,8 @@ write file ?
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
+include/linux/sched.h:549 structure tracant le temps d exec
+include/linux/sched.h:1293 task_struct
+include/linux/pid.h:83 pid_task
+include/linux/pid.h:111 find_vpid
+include/linux/pid.h:84 get_pid_task
