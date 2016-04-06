@@ -6,16 +6,25 @@
 #include <linux/jiffies.h>
 #include <linux/string.h>
 #include <linux/pid.h>
+#include <linux/sched.h>
 #include <asm/uaccess.h>
 
 #define ASE_CMD_BUFFER_LEN 6
-static char	ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
+static char		ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
 static struct pid	*ase_cmd_pid;
+static int		ase_pid;
 
 static int
 ase_cmd_proc_show(struct seq_file *m, void *v)
 {
-  seq_printf(m, "Je suis une loutre");
+  static struct task_struct *task;
+
+  task = pid_task(ase_cmd_pid, PIDTYPE_PID);
+  //seq_printf(m,
+  //"Je suis une loutre ! task : %x, struct_pid : %x pid : %d\n",
+  //	     (unsigned int)task, (unsigned int)ase_cmd_pid, ase_pid);
+  seq_printf(m, "Je suis une loutre ! Je m execute depuis : %llu",
+  	     task->cputime_expires.sum_exec_runtime);
   return 0;
 }
 
@@ -42,8 +51,10 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 
   kstrtol(ase_cmd_buffer, 0, &res);
 
+  ase_pid = res;
+  
   rcu_read_lock();
-  find_vpid((int)res);
+  ase_cmd_pid = find_vpid((int)res);
   rcu_read_unlock();
 
   return len;
