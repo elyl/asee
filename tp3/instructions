@@ -4,8 +4,15 @@
 
 Etat du module:
 Initialisation OK
-show file KO, A faire
-write file ?
+show file fonctionnel mais pas bonne sortie
+write file OK, recherche de PID : A tester mais semble ok
+
+A faire:
+- Gerer plusieurs PID
+- Detecter la mort d'un PID
+- Instruction de fin de monitoring
+- Recuperation temps execution
+- Trouver comment obtenir temps d'exec par core
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
