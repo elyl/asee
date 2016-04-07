@@ -71,3 +71,9 @@ int kstrtol: Convertit une chaine du userspace en int dans la base de notre choi
 const char *s: Chaine a convertir, attention elle doit etre dans l'userspace.
 unsigned int base: Base dans laquelle est ecrite le nombre, mettre 0 pour des raisons d'optimisations
 long *res : Pointeur vers la variable qui contiendra le resultat de l'operation
+
+RESOURCES:
+http://tuxthink.blogspot.fr/2012/01/creating-folder-under-proc-and-creating.html
+http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
+http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
+http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
