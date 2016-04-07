@@ -3,16 +3,20 @@
 - Le mount ne marche pas, necessite sudo
 
 Etat du module:
-Initialisation OK
-show file fonctionnel mais pas bonne sortie
-write file OK, recherche de PID : A tester mais semble ok
+- Initialisation OK
+- show file fonctionnel mais pas bonne sortie
+- Recuperation temps execution OK
+- write file OK
+- Recherche de PID OK
+- Detecter la mort d'un PID; Devrait etre OK, pas encore test
 
 A faire:
-- Gerer plusieurs PID
-- Detecter la mort d'un PID
-- Instruction de fin de monitoring
-- Recuperation temps execution
-- Trouver comment obtenir temps d'exec par core
+- Creer le repertoire /proc/ase (code mais ne marche pas, raison inconnue)
+- Gerer plusieurs PID EC (tableau de struct pid, a vider a chaque mort de PID; Ajouter un compteur de monitoring, evite un parcourt de tableau en cas d'ajout)
+- Ajouter un mutex 
+- Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
+- Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
+- Gerer le cas ou le PID est invalide. (Facile, suffit de verifier la sortir de find_vpid(), en cas de NULL le PID est invalide)
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
@@ -64,6 +68,7 @@ NOTE:	  Il est important d'utiliser un pointeur vers la struct pid plutot que le
 	  Utiliser un pointeur vers la struct task_task est une mauvaise idee car elle sera eventuellement liberee par le kernel provoquant un NULL pointer tandis que la struct pid est conservee. La recherche de struct task_struct renverra simplement NULL ce qui est detectable.
 	  (Lire commentaire dans include/linux/pid.h:15 pour plus d'infos)
 	  (Est il utile de dire pourquoi un pointeur plutot qu'une copie?)
+	  (Il semble etrange tout de même que le systeme garde en memoire une trace de tous les PID (meme si 64bytes font tres peu au final. Il doit y avoir un mecanisme de nettoyage automatique quelque part)
 
 UTILS:
 include/linux/kernel.h:318 kstrtol
@@ -72,8 +77,15 @@ const char *s: Chaine a convertir, attention elle doit etre dans l'userspace.
 unsigned int base: Base dans laquelle est ecrite le nombre, mettre 0 pour des raisons d'optimisations
 long *res : Pointeur vers la variable qui contiendra le resultat de l'operation
 
+SEQ:
+include/linux/seq_file.h:18 struct seq_file
+Structure definissant un seq file, 
+include/linux/user_namespace.h:25 struct user_namespace
+Contient des infos sur les user_namespace, semble etre une fausse piste dans la recherche du nom du seq file courant.
+
 RESOURCES:
 http://tuxthink.blogspot.fr/2012/01/creating-folder-under-proc-and-creating.html
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
+https://www.kernel.org/doc/Documentation/filesystems/seq_file.txt
