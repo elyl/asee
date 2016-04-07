@@ -16,9 +16,49 @@ A faire:
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
-include/linux/sched.h:549 structure tracant le temps d exec
+
+TIME:
+include/linux/sched.h:534
+struct cputime -> Contient le temps d'execution de la task en mode systeme et en mode user
+cputime_t utime, stime : Respectivement temps user et temps system
+
+include/linux/sched.h:553
+struct task_cputime -> Extension de la structure precedente pour traquer egalement le temps global (la somme des deux precedents)
+cputime_t utime, stime : Respectivement temps user et system, sans interets dans le cas present
+unsigned long long sum_exec_runtime : Temps global, celui qui nous interesse
+
+TASK:
 include/linux/sched.h:1293 task_struct
+Tres grosse structure definissant une task au sein du scheduler, beaucoup trop de parametres pour la detailler. Ceux qui nous interessent ici sont:
+pid_t pid: PID de la task. (Line 1394)
+struct task_cputime cputime_expires: Temps passe dans les differents mode sur le cpu.(NOTE: Ceci est une structure et non pas un pointeur sur une structure)(Line 1452)
+
+PID:
+include/linux/pid.h:6 pid_type
+enum pid_type -> Differents types de PID, necessaire pour les recherches de PID/Task
+Celui qui nous interesse est PIDTYPE_PID
+
 include/linux/pid.h:83 pid_task
+struct task_struct *pid_task -> Retourne un pointeur vers la struct task_struct associee au PID en parametre
+struct pid *pid: Pointeur vers la struct pid associee a la task recherchee.
+pid_type: Type de PID. PIDTYPE_PID dans le cas present.
+
 include/linux/pid.h:111 find_vpid
+struct pid *find_vpid -> Retourne un pointeur vers la struct pid associee au numero de PID passee en parametre
+int nr: Numéro du pid
+ATTENTION:     Necessite la prise de verrou en lecture, rcu_read_lock() et rcu_read_unlock()
+	       (Fonctions definies dans include/linux/)
+	       (Lire commentaire include/linux/pid.h:102 pour plus de details)
+
 include/linux/pid.h:84 get_pid_task
+struct task_struct *get_pid_task -> Retourne un pointeur vers la struct task_struct associee a la struct pid
+struct pid *pid: Pointeur vers la struct pid recherchee
+enum pid_type type: Type de PID. Ici PIDTYPE_PID
+
+NOTE:	  Il est important d'utiliser un pointeur vers la struct pid plutot que le PID lui meme, la struct sera toujours propre au job que l'on traque contrairement au PID qui peut etre reaatribue par le kernel eventuellement.
+	  Utiliser un pointeur vers la struct task_task est une mauvaise idee car elle sera eventuellement liberee par le kernel provoquant un NULL pointer tandis que la struct pid est conservee. La recherche de struct task_struct renverra simplement NULL ce qui est detectable.
+	  (Lire commentaire dans include/linux/pid.h:15 pour plus d'infos)
+	  (Est il utile de dire pourquoi un pointeur plutot qu'une copie?)
+
+UTILS:
 include/linux/kernel.h:363 kstrtoutint
