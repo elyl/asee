@@ -27,11 +27,16 @@ struct task_cputime -> Extension de la structure precedente pour traquer egaleme
 cputime_t utime, stime : Respectivement temps user et system, sans interets dans le cas present
 unsigned long long sum_exec_runtime : Temps global, celui qui nous interesse
 
+include/linux/cputime.h:7 cputime_to_nsecs
+Macro pour convertir un cputime_t en usecs
+
 TASK:
 include/linux/sched.h:1293 task_struct
 Tres grosse structure definissant une task au sein du scheduler, beaucoup trop de parametres pour la detailler. Ceux qui nous interessent ici sont:
 pid_t pid: PID de la task. (Line 1394)
-struct task_cputime cputime_expires: Temps passe dans les differents mode sur le cpu.(NOTE: Ceci est une structure et non pas un pointeur sur une structure)(Line 1452)
+struct task_cputime cputime_expires: Surement un rapport avec le temps d'exec mais aucune idee duquel(NOTE: Ceci est une structure et non pas un pointeur sur une structure)(Line 1452)
+cputime_t utime, stime : Temps d'execution system et user.(Line 1432)
+
 
 PID:
 include/linux/pid.h:6 pid_type
@@ -47,7 +52,7 @@ include/linux/pid.h:111 find_vpid
 struct pid *find_vpid -> Retourne un pointeur vers la struct pid associee au numero de PID passee en parametre
 int nr: Numéro du pid
 ATTENTION:     Necessite la prise de verrou en lecture, rcu_read_lock() et rcu_read_unlock()
-	       (Fonctions definies dans include/linux/)
+	       (Je n'ai pas trouve le fichier de definition de ces fonctions pour le moment)
 	       (Lire commentaire include/linux/pid.h:102 pour plus de details)
 
 include/linux/pid.h:84 get_pid_task
@@ -61,4 +66,8 @@ NOTE:	  Il est important d'utiliser un pointeur vers la struct pid plutot que le
 	  (Est il utile de dire pourquoi un pointeur plutot qu'une copie?)
 
 UTILS:
-include/linux/kernel.h:363 kstrtoutint
+include/linux/kernel.h:318 kstrtol
+int kstrtol: Convertit une chaine du userspace en int dans la base de notre choix (ici 10). Fonction optimise a prefere aux autres.
+const char *s: Chaine a convertir, attention elle doit etre dans l'userspace.
+unsigned int base: Base dans laquelle est ecrite le nombre, mettre 0 pour des raisons d'optimisations
+long *res : Pointeur vers la variable qui contiendra le resultat de l'operation
