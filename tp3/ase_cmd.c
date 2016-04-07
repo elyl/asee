@@ -7,6 +7,7 @@
 #include <linux/string.h>
 #include <linux/pid.h>
 #include <linux/sched.h>
+#include <linux/cputime.h>
 #include <asm/uaccess.h>
 
 #define ASE_CMD_BUFFER_LEN 6
@@ -23,8 +24,8 @@ ase_cmd_proc_show(struct seq_file *m, void *v)
   //seq_printf(m,
   //"Je suis une loutre ! task : %x, struct_pid : %x pid : %d\n",
   //	     (unsigned int)task, (unsigned int)ase_cmd_pid, ase_pid);
-  seq_printf(m, "Je suis une loutre ! Je m execute depuis : %llu",
-  	     task->cputime_expires.sum_exec_runtime);
+  seq_printf(m, "Je suis une loutre ! Je m execute depuis : %d",
+  	     cputime_to_usecs(task->utime));
   return 0;
 }
 
