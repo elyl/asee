@@ -83,6 +83,8 @@ Structure definissant un seq file,
 include/linux/user_namespace.h:25 struct user_namespace
 Contient des infos sur les user_namespace, semble etre une fausse piste dans la recherche du nom du seq file courant.
 
+http://lxr.free-electrons.com/source/include/linux/proc_fs.h#L64
+
 RESOURCES:
 http://tuxthink.blogspot.fr/2012/01/creating-folder-under-proc-and-creating.html
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
