@@ -18,7 +18,10 @@ A faire:
 - Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
 - Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Gerer plusieurs fichiers
+- Gerer plusieurs fichiers EC
+- Basculer la lecture sur la nouvelle structure
+- Basculer l'écriture sur la nouvelle structure
+- Remplacer ase_cmd_buffer par un buffer local en parametre de ase_cmd_new_file
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
