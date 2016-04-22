@@ -16,7 +16,7 @@ A faire:
 - Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
 - Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Gerer le cas ou le PID est invalide. (Facile, suffit de verifier la sortir de find_vpid(), en cas de NULL le PID est invalide)
+- Gerer le cas ou le PID est invalide. (Facile, suffit de verifier la sortie de find_vpid(), en cas de NULL le PID est invalide)
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
@@ -91,3 +91,4 @@ http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-sp
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
 https://www.kernel.org/doc/Documentation/filesystems/seq_file.txt
+http://tuxthink.blogspot.fr/2013/10/creation-of-proc-entrt-using.html

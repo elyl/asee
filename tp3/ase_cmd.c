@@ -15,23 +15,30 @@ static char		ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
 
 #define ASE_CMD_MAX_PID 10
 static struct pid	*ase_cmd_pid[ASE_CMD_MAX_PID] = {NULL};
+static int		ase_cmd_pid_total = 0;
 
 static struct proc_dir_entry	*ase_proc_parent;
 
 static int
 ase_cmd_proc_show(struct seq_file *m, void *v)
 {
-  static struct task_struct *task;
+  static struct task_struct	*task;
+  int				n;
 
-  /*  task = pid_task(ase_cmd_pid, PIDTYPE_PID);
+  n = 0;
+  task = pid_task(ase_cmd_pid[n], PIDTYPE_PID);
   if (task != NULL)
-    seq_printf(m, "Je suis une loutre ! ",
-  	     cputime_to_usecs(task->utime + task->stime));
-  else
     {
+      seq_printf(m, "Je suis une loutre ! %d",
+		 cputime_to_usecs(task->utime + task->stime));
+    }
+ else
+    {
+      ase_cmd_pid[n] = NULL;
+      ase_cmd_pid_total = 0;
       printk(KERN_INFO "ASE_CMD: Task doesn't exist anymore");
-      }*/
-  seq_printf(m, "Je suis une loutre ! %s", (char*)v);
+      return -1;
+    }
   return 0;
 }
 
@@ -45,7 +52,10 @@ static ssize_t
 ase_cmd_proc_write(struct file *filp, const char __user *buff,
 		   size_t len, loff_t *data)
 {
-  long res;
+  long		res;
+  struct pid	*tmp_pid;
+  int		i;
+  
   printk(KERN_INFO "ASE_CMD: Write has been called");
   if (len > (ASE_CMD_BUFFER_LEN - 1)) {
     printk(KERN_INFO "ASE_CMD: error, input too long");
@@ -58,9 +68,25 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 
   kstrtol(ase_cmd_buffer, 0, &res);
   
-  /*  rcu_read_lock();
-  ase_cmd_pid = find_vpid((int)res);
-  rcu_read_unlock();*/
+  rcu_read_lock();
+  tmp_pid = find_vpid((int)res);
+  rcu_read_unlock();
+
+  if (!tmp_pid)
+    {
+      printk(KERN_INFO "ASE_CMD: PID not found");
+      return -1;
+    }
+  if (ase_cmd_pid_total >= ASE_CMD_MAX_PID)
+    {
+      printk(KERN_INFO "ASE_CMD: Max PID reached");
+      return -3;
+    }
+  ++ase_cmd_pid_total;
+
+  for (i = 0;ase_cmd_pid[i] != NULL;++i)
+    ;
+  ase_cmd_pid[i] = tmp_pid;
 
   return len;
 }
@@ -77,12 +103,14 @@ static const struct file_operations ase_cmd_proc_fops = {
 static int __init
 ase_cmd_proc_init(void)
 {
+  printk(KERN_INFO "ASE_CMD: Coucou 1");
   ase_proc_parent = proc_mkdir("ase", NULL);
-  /*  if (!ase_proc_parent)
+    if (!ase_proc_parent)
     {
       printk(KERN_INFO "ASE_CMD: Error creating the directory /proc/ase");
       return -ENOMEM;
-      }*/
+    }
+    printk(KERN_INFO "ASE_CMD: Coucou 2");
   if (!proc_create("ase_cmd", 0666, NULL, &ase_cmd_proc_fops))
     {
       printk(KERN_INFO "ASE_CMD: Error creating the file /proc/ase_cmd");
@@ -95,6 +123,7 @@ static void __exit
 ase_cmd_proc_exit(void)
 {
   remove_proc_entry("ase_cmd", NULL);
+  remove_proc_entry("ase", NULL);
 }
 
 module_init(ase_cmd_proc_init);
