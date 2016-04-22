@@ -24,6 +24,23 @@ static struct proc_dir_entry	*ase_proc_parent;
 static int
 ase_cmd_proc_show(struct seq_file *m, void *v)
 {
+  int	i;
+
+  if (ase_cmd_pid_total == 0)
+    {
+      seq_printf(m, "You are not monitoring any PID right now");
+      printk(KERN_INFO "ASE_CMD: LOUTRE LOUTRE LOUTRE LOUTRE\n");
+    }
+  else
+    seq_printf(m, "Currently monitored PID:\n(Some of them might be dead already)\n");
+  for (i = 0;i < ASE_CMD_MAX_PID; ++i)
+    if (ase_cmd_pid_list[i] != 0)
+    seq_printf(m, "%d\n", ase_cmd_pid_list[i]);
+  return 0;
+}
+
+static int file_pid(struct seq_file *m, void *v)
+{
   static struct task_struct	*task;
   int				n;
 
@@ -48,6 +65,7 @@ ase_cmd_proc_show(struct seq_file *m, void *v)
 static int
 ase_cmd_proc_open(struct inode *inode, struct file *file)
 {
+  printk(KERN_INFO "ASE_CMD: Open has been called");
   return single_open(file, ase_cmd_proc_show, NULL);
 }
 
@@ -66,6 +84,7 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
     return -EINVAL;
   }
   else if (copy_from_user(ase_cmd_buffer, buff, len)) {
+    printk(KERN_INFO "ASE_CMD: error while copying from userspace");
     return -2;
   }
   ase_cmd_buffer[len] = 0;
@@ -79,6 +98,7 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
     }
   ++ase_cmd_pid_total;
 
+  printk(KERN_INFO "ASE_CMD: Finding space in list");
   k = 0;
   // On va chercher une place dans la liste des pid et verifier que le pid est pas deja monitore
   for (i = 0;i < ASE_CMD_MAX_PID;++i)
@@ -91,7 +111,7 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 	  return -1;
 	}
     }
-    
+  printk(KERN_INFO "ASE_CMD: getting pid struct");
     rcu_read_lock();
     tmp_pid = find_vpid((int)res);
     rcu_read_unlock();
@@ -104,7 +124,8 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 
   ase_cmd_pid_struct[k] = tmp_pid;
   ase_cmd_pid_list[k] = (int)res;
-
+  printk(KERN_INFO "ASE_CMD: new pid registered");
+  
   return len;
 }
 
@@ -120,14 +141,12 @@ static const struct file_operations ase_cmd_proc_fops = {
 static int __init
 ase_cmd_proc_init(void)
 {
-  printk(KERN_INFO "ASE_CMD: Coucou 1");
   ase_proc_parent = proc_mkdir("ase", NULL);
     if (!ase_proc_parent)
     {
       printk(KERN_INFO "ASE_CMD: Error creating the directory /proc/ase");
       return -ENOMEM;
     }
-    printk(KERN_INFO "ASE_CMD: Coucou 2");
   if (!proc_create("ase_cmd", 0666, NULL, &ase_cmd_proc_fops))
     {
       printk(KERN_INFO "ASE_CMD: Error creating the file /proc/ase_cmd");

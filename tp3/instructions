@@ -9,17 +9,20 @@ Etat du module:
 - write file OK
 - Recherche de PID OK
 - Detecter la mort d'un PID; Devrait etre OK, pas encore test
+- Gerer le cas ou le PID est invalide. (Facile, suffit de verifier la sortie de find_vpid(), en cas de NULL le PID est invalide) OK
+- Gerer plusieurs PID EC (tableau de struct pid, a vider a chaque mort de PID; Ajouter un compteur de monitoring, evite un parcour de tableau en cas d'ajout) OK
+- Creer le repertoire /proc/ase (code mais ne marche pas, raison inconnue) OK
+- Lire le fichier ? OK
 
 A faire:
-- Creer le repertoire /proc/ase (code mais ne marche pas, raison inconnue)
-- Gerer plusieurs PID EC (tableau de struct pid, a vider a chaque mort de PID; Ajouter un compteur de monitoring, evite un parcourt de tableau en cas d'ajout)
 - Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
 - Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Gerer le cas ou le PID est invalide. (Facile, suffit de verifier la sortie de find_vpid(), en cas de NULL le PID est invalide)
+- Gerer plusieurs fichiers
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
+ne pas faire de printk avant seq_printf, sinon le seq_printf ne s'execute pas
 
 TIME:
 include/linux/sched.h:534
