@@ -43,6 +43,9 @@ cputime_t utime, stime : Temps d'execution system et user.(Line 1432)
 
 
 PID:
+include/linux/pid.h:57 struct pid
+Structure representant un PID, sans grand interet pour le projet courant a priori
+
 include/linux/pid.h:6 pid_type
 enum pid_type -> Differents types de PID, necessaire pour les recherches de PID/Task
 Celui qui nous interesse est PIDTYPE_PID

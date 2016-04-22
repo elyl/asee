@@ -14,7 +14,9 @@
 static char		ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
 
 #define ASE_CMD_MAX_PID 10
-static struct pid	*ase_cmd_pid[ASE_CMD_MAX_PID] = {NULL};
+static struct pid	*ase_cmd_pid_struct[ASE_CMD_MAX_PID] = {NULL};
+static int		ase_cmd_pid_list[ASE_CMD_MAX_PID] = {0};
+
 static int		ase_cmd_pid_total = 0;
 
 static struct proc_dir_entry	*ase_proc_parent;
@@ -26,7 +28,7 @@ ase_cmd_proc_show(struct seq_file *m, void *v)
   int				n;
 
   n = 0;
-  task = pid_task(ase_cmd_pid[n], PIDTYPE_PID);
+  task = pid_task(ase_cmd_pid_struct[n], PIDTYPE_PID);
   if (task != NULL)
     {
       seq_printf(m, "Je suis une loutre ! %d",
@@ -34,8 +36,9 @@ ase_cmd_proc_show(struct seq_file *m, void *v)
     }
  else
     {
-      ase_cmd_pid[n] = NULL;
+      ase_cmd_pid_struct[n] = NULL;
       ase_cmd_pid_total = 0;
+      ase_cmd_pid_list[n] = 0;
       printk(KERN_INFO "ASE_CMD: Task doesn't exist anymore");
       return -1;
     }
@@ -55,6 +58,7 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
   long		res;
   struct pid	*tmp_pid;
   int		i;
+  int		k;
   
   printk(KERN_INFO "ASE_CMD: Write has been called");
   if (len > (ASE_CMD_BUFFER_LEN - 1)) {
@@ -68,15 +72,6 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 
   kstrtol(ase_cmd_buffer, 0, &res);
   
-  rcu_read_lock();
-  tmp_pid = find_vpid((int)res);
-  rcu_read_unlock();
-
-  if (!tmp_pid)
-    {
-      printk(KERN_INFO "ASE_CMD: PID not found");
-      return -1;
-    }
   if (ase_cmd_pid_total >= ASE_CMD_MAX_PID)
     {
       printk(KERN_INFO "ASE_CMD: Max PID reached");
@@ -84,9 +79,31 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
     }
   ++ase_cmd_pid_total;
 
-  for (i = 0;ase_cmd_pid[i] != NULL;++i)
-    ;
-  ase_cmd_pid[i] = tmp_pid;
+  k = 0;
+  // On va chercher une place dans la liste des pid et verifier que le pid est pas deja monitore
+  for (i = 0;i < ASE_CMD_MAX_PID;++i)
+    {
+      if (ase_cmd_pid_struct[i] == NULL)
+	k = i;
+      if (ase_cmd_pid_list[i] == (int)res)
+	{
+	  printk(KERN_INFO "ASE_CMD: PID already monitored");
+	  return -1;
+	}
+    }
+    
+    rcu_read_lock();
+    tmp_pid = find_vpid((int)res);
+    rcu_read_unlock();
+
+    if (!tmp_pid)
+      {
+      printk(KERN_INFO "ASE_CMD: PID not found");
+      return -1;
+    }
+
+  ase_cmd_pid_struct[k] = tmp_pid;
+  ase_cmd_pid_list[k] = (int)res;
 
   return len;
 }
