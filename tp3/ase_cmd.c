@@ -51,7 +51,9 @@ ase_cmd_proc_pid_show(struct seq_file *m, void *v)
 {
   static struct task_struct	*task;
   int				n;
+  void				*data;
 
+  //data=PDE_DATA(file_inode(m));
   seq_printf(m, "%x\n", (unsigned int)v);
   return 0;
   /*task = pid_task(ase_cmd_pid_struct[n], PIDTYPE_PID);
@@ -74,7 +76,8 @@ ase_cmd_proc_pid_show(struct seq_file *m, void *v)
 static int
 ase_cmd_proc_pid_open(struct inode *inode, struct file *file)
 {
-  return single_open(file, ase_cmd_proc_pid_show, NULL);
+  printk(KERN_INFO "ASE_CMD: Open pid has been called");
+  return single_open(file, ase_cmd_proc_pid_show, file);
 }
 
 static int
@@ -144,6 +147,7 @@ ase_cmd_new_file(int n)
       printk(KERN_INFO "ASE_CMD: Error creating pid file");
       return -1;
     }
+  printk(KERN_INFO "ASE_CMD: Created new PID file");
   return 0;
 }
 

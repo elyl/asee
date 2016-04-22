@@ -13,15 +13,16 @@ Etat du module:
 - Gerer plusieurs PID EC (tableau de struct pid, a vider a chaque mort de PID; Ajouter un compteur de monitoring, evite un parcour de tableau en cas d'ajout) OK
 - Creer le repertoire /proc/ase (code mais ne marche pas, raison inconnue) OK
 - Lire le fichier ? OK
+- Gerer plusieurs fichiers OK
 
 A faire:
 - Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
 - Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Gerer plusieurs fichiers EC
 - Basculer la lecture sur la nouvelle structure
 - Basculer l'écriture sur la nouvelle structure
 - Remplacer ase_cmd_buffer par un buffer local en parametre de ase_cmd_new_file
+- Trouver pourquoi data vaut 1
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
@@ -92,6 +93,10 @@ Structure definissant un seq file,
 include/linux/user_namespace.h:25 struct user_namespace
 Contient des infos sur les user_namespace, semble etre une fausse piste dans la recherche du nom du seq file courant.
 
+FILE:
+include/linux/fs.h:829 struct file
+Structure decrivant un fichier, sert pour inode
+
 http://lxr.free-electrons.com/source/include/linux/proc_fs.h#L64
 
 RESOURCES:
@@ -101,3 +106,4 @@ http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-sp
 http://stackoverflow.com/questions/7973992/finding-amount-of-cpu-time-process-spent-in-kernel-routines
 https://www.kernel.org/doc/Documentation/filesystems/seq_file.txt
 http://tuxthink.blogspot.fr/2013/10/creation-of-proc-entrt-using.html
+http://kernelnewbies.org/Documents/SeqFileHowTo
