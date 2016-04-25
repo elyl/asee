@@ -1,3 +1,34 @@
+Axel LHEUREUX
+
+A LIRE:
+Utilisation:
+Lors du lancement le module va creer un repertoire /proc/ase et un fichier /proc/ase_cmd .
+A tout moment un cat sur le fichier /proc/ase_cmd affichera la liste des PID en cours de monitoring. Cette operation ne verifient pas si les programmes associes aux PID sont toujours en cours d'executions.
+
+Pour suivre un PID il faut l ecrire dans le fichier /proc/ase_cmd et le module commencera alors le monitoring. Un fichier /proc/ase/<PID> sera créé, il contiendra le temps d'execution du programme associe au PID au moment de la demande d'affichage.
+
+Lors de l'affichage le module va verifier si le programme initialement associe a ce PID est toujours en cours d'execution. Si le programme initial est termine le fichier sera supprime et rien ne sera affiche.
+
+Fonctionnement:
+Ecriture dans le fichier /proc/ase_cmd:
+- Le module verifie que le nombre maximal de PID n'est pas atteint (10 acutellement)
+- On recupere le numero de PID dans le fichier
+- Le module cherche un emplacement disponible dans le tableau des PID. Le dernier emplacement trouve sera utilise (explication en dessous)
+- En meme temps qu'il effectue cette recherche il va verifier que le nouveau PID n'est pas deja enregistre, si c'est le cas il n'est pas ajoute
+- Le module verifie que le PID est bien utilise par le systeme
+- un fichier est cree dans /proc/ase/ portant le numero du PID
+
+Lecture d'un fichier dans /proc/ase/:
+- On recupere le pointeur vers l'entree dans la table des PID monitores correspondant a notre fichier
+- On verouille l'acces a la variable globale pid_entry_current  a l'aide d'une mutex simpliste
+- On copie le pointeur precedemnt trouve dans pid_entry_current
+- On essaye de recuperer la struct task associee a ce pid, en cas d'erreurs ca veut dire que le programme initial n'existe plus.
+- On affcihe le temps d'execution total
+
+
+Ci dessous se trouvent mes recherches, notes et remarques rediges lors du developpement du module. Ils sont disposes un peu en vrac sans ordre particulier.
+
+
 - L'image debian est dans /kvm/debian32.img
 - Le build dans /build/kvm32 ne marche pas, il build dans le repertoire racine
 - Le mount ne marche pas, necessite sudo
@@ -14,15 +45,17 @@ Etat du module:
 - Creer le repertoire /proc/ase (code mais ne marche pas, raison inconnue) OK
 - Lire le fichier ? OK
 - Gerer plusieurs fichiers OK
+- Basculer la lecture sur la nouvelle structure OK
+- Basculer l'écriture sur la nouvelle structure OK
+- Trouver pourquoi data vaut 1 OK (Mauvais passage de param)
 
 A faire:
 - Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
 - Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Basculer la lecture sur la nouvelle structure
-- Basculer l'écriture sur la nouvelle structure
 - Remplacer ase_cmd_buffer par un buffer local en parametre de ase_cmd_new_file
-- Trouver pourquoi data vaut 1
+- Nettoyer les fichiers en sortie de module pour supprimer un warning
+- Virer le point d'interrogation a la fin du fichier
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
