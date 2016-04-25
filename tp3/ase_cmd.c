@@ -33,8 +33,10 @@ static struct proc_dir_entry	*ase_proc_parent;
 static void
 pid_lock(void)
 {
+  printk(KERN_INFO "ASE_CMD: Waiting for unlocking");
   while (pid_mutex == 1)
     ;
+  printk(KERN_INFO "ASE_CMD: Lock has beek taken");
   pid_mutex = 1;
   return;
 }
@@ -74,7 +76,8 @@ ase_cmd_proc_pid_show(struct seq_file *m, void *v)
   task = pid_task(s->pid_s, PIDTYPE_PID);
   if (task != NULL)
     {
-      seq_printf(m, "Je suis une loutre ! %d",
+      seq_printf(m, "PID %d has been running for %d\n",
+		 s->pid_n,
 		 cputime_to_usecs(task->utime + task->stime));
     }
   else

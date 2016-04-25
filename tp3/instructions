@@ -25,8 +25,11 @@ Lecture d'un fichier dans /proc/ase/:
 - On essaye de recuperer la struct task associee a ce pid, en cas d'erreurs ca veut dire que le programme initial n'existe plus.
 - On affcihe le temps d'execution total
 
+BUG:
+Lorsque le programme associe au PID n'est plus utilise l'affichage du fichier /proc/ase/<PID> va bloquer au lieu d'echouer. Mes recherches indiquent que pid_task devrait retourner NULL mais a la place cette fonction bloque l execution.
 
-Ci dessous se trouvent mes recherches, notes et remarques rediges lors du developpement du module. Ils sont disposes un peu en vrac sans ordre particulier.
+
+Ci dessous se trouve mes recherches, notes et remarques rediges lors du developpement du module. Ils sont disposes un peu en vrac sans ordre particulier.
 
 
 - L'image debian est dans /kvm/debian32.img
