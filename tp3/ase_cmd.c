@@ -12,21 +12,39 @@
 
 struct ase_cmd_pid
 {
-  struct pid	*pid_s;
-  int		pid_n;
+  struct pid		*pid_s;
+  int			pid_n;
+  struct proc_dir_entry	*pid_proc;
 };
 
-#define ASE_CMD_BUFFER_LEN 6
+#define ASE_CMD_BUFFER_LEN 10
 static char		ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
 
 #define ASE_CMD_MAX_PID 10
-static struct pid	*ase_cmd_pid_struct[ASE_CMD_MAX_PID] = {NULL};
-static int		ase_cmd_pid_list[ASE_CMD_MAX_PID] = {0};
 static struct ase_cmd_pid	ase_cmd_list[ASE_CMD_MAX_PID];
 
 static int		ase_cmd_pid_total = 0;
 
+static int			pid_mutex = 0;
+static struct ase_cmd_pid	*pid_entry_current;
+
 static struct proc_dir_entry	*ase_proc_parent;
+
+static void
+pid_lock(void)
+{
+  while (pid_mutex == 1)
+    ;
+  pid_mutex = 1;
+  return;
+}
+
+static void
+pid_unlock(void)
+{
+  pid_mutex = 0;
+  return;
+}
 
 static int
 ase_cmd_proc_show(struct seq_file *m, void *v)
@@ -36,13 +54,12 @@ ase_cmd_proc_show(struct seq_file *m, void *v)
   if (ase_cmd_pid_total == 0)
     {
       seq_printf(m, "You are not monitoring any PID right now\n");
-      printk(KERN_INFO "ASE_CMD: LOUTRE LOUTRE LOUTRE LOUTRE\n");
     }
   else
     seq_printf(m, "Currently monitored PID:\n(Some of them might be dead already)\n");
   for (i = 0;i < ASE_CMD_MAX_PID; ++i)
-    if (ase_cmd_pid_list[i] != 0)
-    seq_printf(m, "%d\n", ase_cmd_pid_list[i]);
+    if (ase_cmd_list[i].pid_s != NULL)
+    seq_printf(m, "%d\n", ase_cmd_list[i].pid_n);
   return 0;
 }
 
@@ -50,33 +67,34 @@ static int
 ase_cmd_proc_pid_show(struct seq_file *m, void *v)
 {
   static struct task_struct	*task;
-  int				n;
-  void				*data;
+  struct ase_cmd_pid		*s;
 
-  //data=PDE_DATA(file_inode(m));
-  seq_printf(m, "%x\n", (unsigned int)v);
-  return 0;
-  /*task = pid_task(ase_cmd_pid_struct[n], PIDTYPE_PID);
+  s = pid_entry_current;
+  pid_unlock();
+  task = pid_task(s->pid_s, PIDTYPE_PID);
   if (task != NULL)
     {
       seq_printf(m, "Je suis une loutre ! %d",
 		 cputime_to_usecs(task->utime + task->stime));
     }
- else
+  else
     {
-      ase_cmd_pid_struct[n] = NULL;
-      ase_cmd_pid_total = 0;
-      ase_cmd_pid_list[n] = 0;
+      s->pid_s = NULL;
+      s->pid_n = 0;
+      proc_remove(s->pid_proc);
+      s->pid_proc = NULL;
       printk(KERN_INFO "ASE_CMD: Task doesn't exist anymore");
       return -1;
     }
-    return 0;*/
+  return 0;
 }
 
 static int
 ase_cmd_proc_pid_open(struct inode *inode, struct file *file)
 {
   printk(KERN_INFO "ASE_CMD: Open pid has been called");
+  pid_lock();
+  pid_entry_current = (struct ase_cmd_pid*)PDE_DATA(inode);
   return single_open(file, ase_cmd_proc_pid_show, file);
 }
 
@@ -106,10 +124,11 @@ ase_cmd_add_pid(long res)
   // On va chercher une place dans la liste des pid et verifier que le pid est pas deja monitore
   for (i = 0;i < ASE_CMD_MAX_PID;++i)
     {
-      if (ase_cmd_pid_struct[i] == NULL)
+      if (ase_cmd_list[i].pid_s == NULL)
 	k = i;
-      if (ase_cmd_pid_list[i] == (int)res)
+      if (ase_cmd_list[i].pid_n == (int)res)
 	{
+	  --ase_cmd_pid_total;
 	  printk(KERN_INFO "ASE_CMD: PID already monitored");
 	  return -1;
 	}
@@ -125,10 +144,10 @@ ase_cmd_add_pid(long res)
       return -1;
     }
 
-  ase_cmd_pid_struct[k] = tmp_pid;
-  ase_cmd_pid_list[k] = (int)res;
+  ase_cmd_list[k].pid_s = tmp_pid;
+  ase_cmd_list[k].pid_n = (int)res;
   printk(KERN_INFO "ASE_CMD: new pid registered");
-  return 0;
+  return k;
 }
 
 static const struct file_operations ase_cmd_proc_pid_fops = {
@@ -142,11 +161,15 @@ static const struct file_operations ase_cmd_proc_pid_fops = {
 static int
 ase_cmd_new_file(int n)
 {
-  if (!proc_create_data(ase_cmd_buffer, 0666, ase_proc_parent, &ase_cmd_proc_pid_fops, &ase_cmd_list[n]))
+  struct proc_dir_entry	*entry;
+  
+  entry = proc_create_data(ase_cmd_buffer, 0666, ase_proc_parent, &ase_cmd_proc_pid_fops, &ase_cmd_list[n]);
+  if (!entry)
     {
       printk(KERN_INFO "ASE_CMD: Error creating pid file");
       return -1;
     }
+  ase_cmd_list[n].pid_proc = entry;
   printk(KERN_INFO "ASE_CMD: Created new PID file");
   return 0;
 }
@@ -173,7 +196,7 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
 
   if ((r = ase_cmd_add_pid(res)) < 0)
     return r;
-  if ((r = ase_cmd_new_file(res)) < 0)
+  if ((r = ase_cmd_new_file(r)) < 0)
     return r;
   
   return len;
@@ -205,6 +228,7 @@ ase_cmd_proc_init(void)
   return 0;
 }
 
+// Ajouter clean des fichiers a la sortie, necessaire?
 static void __exit
 ase_cmd_proc_exit(void)
 {
