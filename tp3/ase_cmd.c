@@ -18,6 +18,7 @@ struct ase_cmd_pid
 };
 
 #define ASE_CMD_BUFFER_LEN 10
+static int		buffer_mutex;
 static char		ase_cmd_buffer[ASE_CMD_BUFFER_LEN];
 
 #define ASE_CMD_MAX_PID 10
@@ -29,6 +30,34 @@ static int			pid_mutex = 0;
 static struct ase_cmd_pid	*pid_entry_current;
 
 static struct proc_dir_entry	*ase_proc_parent;
+
+static void
+clean_buffer(void)
+{
+  int	i;
+
+  i = 0;
+  while (ase_cmd_buffer[i])
+    {
+      if ((ase_cmd_buffer[i] < '0' || ase_cmd_buffer[i] > '9') && ase_cmd_buffer[i] != ' ')
+	ase_cmd_buffer[i] = '\0';
+      ++i;
+    }
+}
+
+static void
+buffer_lock(void)
+{
+  while (buffer_mutex == 1)
+    ;
+  buffer_mutex = 1;
+}
+
+static void
+buffer_unlock(void)
+{
+  buffer_mutex = 0;
+}
 
 static void
 pid_lock(void)
@@ -76,9 +105,10 @@ ase_cmd_proc_pid_show(struct seq_file *m, void *v)
   task = pid_task(s->pid_s, PIDTYPE_PID);
   if (task != NULL)
     {
-      seq_printf(m, "PID %d has been running for %d\n",
+      seq_printf(m, "PID %d, execution time:\n user: %d ms\n system : %d ms\n",
 		 s->pid_n,
-		 cputime_to_usecs(task->utime + task->stime));
+		 cputime_to_usecs(task->utime),
+		 cputime_to_usecs(task->stime));
     }
   else
     {
@@ -189,11 +219,13 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
     printk(KERN_INFO "ASE_CMD: error, input too long");
     return -EINVAL;
   }
-  else if (copy_from_user(ase_cmd_buffer, buff, len)) {
+  buffer_lock();
+  if (copy_from_user(ase_cmd_buffer, buff, len)) {
     printk(KERN_INFO "ASE_CMD: error while copying from userspace");
     return -2;
   }
-  ase_cmd_buffer[len] = 0;
+  ase_cmd_buffer[len] = '\0';
+  clean_buffer();
 
   kstrtol(ase_cmd_buffer, 0, &res);
 
@@ -201,7 +233,8 @@ ase_cmd_proc_write(struct file *filp, const char __user *buff,
     return r;
   if ((r = ase_cmd_new_file(r)) < 0)
     return r;
-  
+
+  buffer_unlock();
   return len;
 }
 
@@ -235,7 +268,15 @@ ase_cmd_proc_init(void)
 static void __exit
 ase_cmd_proc_exit(void)
 {
+  int	i;
+  
   remove_proc_entry("ase_cmd", NULL);
+
+  for (i = 0; i < ASE_CMD_MAX_PID; ++i)
+    {
+      if (ase_cmd_list[i].pid_proc != NULL)
+	proc_remove(ase_cmd_list[i].pid_proc);
+    }
   remove_proc_entry("ase", NULL);
 }
 

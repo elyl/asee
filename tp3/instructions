@@ -51,14 +51,13 @@ Etat du module:
 - Basculer la lecture sur la nouvelle structure OK
 - Basculer l'écriture sur la nouvelle structure OK
 - Trouver pourquoi data vaut 1 OK (Mauvais passage de param)
+- Virer le point d'interrogation a la fin du fichier OK (caractere pourri)
+- Ajouter un mutex sur ase_cmd_buffer OK
+- Nettoyer les fichiers en sortie de module pour supprimer un warning OK
 
 A faire:
-- Ajouter un mutex 
 - Instruction de fin de monitoring (quelque chose genre <PID 1> pour lancer le monitoring et <PID 0> pour le stopper)
-- Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler(Flemme))
-- Remplacer ase_cmd_buffer par un buffer local en parametre de ase_cmd_new_file
-- Nettoyer les fichiers en sortie de module pour supprimer un warning
-- Virer le point d'interrogation a la fin du fichier
+- Trouver comment obtenir temps d'exec par core (Semble devoir etre fait a la main en porbant le scheduler)
 
 Recherches:
 mettre un prob dans do_sched_setScheduler; core.c:3705
